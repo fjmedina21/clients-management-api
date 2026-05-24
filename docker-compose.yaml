@@ -1,0 +1,60 @@
+services:
+
+  database:
+    image: postgres:17
+    container_name: clients-management-postgres
+
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - clients-management-network
+
+  api:
+    image: fjmedina21/clients-management:latest
+#    build:
+    #      context: .
+    #      dockerfile: src/main/docker/Dockerfile.jvm
+
+    container_name: clients-management-api
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      POSTGRES_URL: "jdbc:postgresql://database:5432/testdb"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: update
+      JAVA_OPTS_APPEND: "-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager 
+      -Dquarkus.profile=docker"
+
+    restart: unless-stopped
+
+    networks:
+      - clients-management-network
+
+networks:
+  clients-management-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

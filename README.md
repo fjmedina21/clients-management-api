@@ -207,8 +207,7 @@ Permite actualizar:
 * teléfono
 * dirección
 * país
-* gentilicio
-
+* gentilicio (se actualiza automaticamente en base al país seleccionado, consultando un servicio externo, [restcountriesapi.com](restcountries.com/v3.1/alpha/{code}))
 ---
 
 ### `deleteClient()`
